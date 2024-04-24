@@ -10,12 +10,12 @@ import (
 )
 
 type ServiceController struct {
-	logic *logic.ServiceLogic
+	logic *logic.Logic
 }
 
 func NewServiceController() *ServiceController {
 	return &ServiceController{
-		logic: logic.NewServiceLogic(),
+		logic: logic.NewLogic(),
 	}
 }
 
@@ -76,7 +76,16 @@ func (s ServiceController) FindByName(c *gin.Context) {
 }
 
 func (s ServiceController) FindAll(c *gin.Context) {
-	infos, _ := s.logic.FindAll(c)
+	infos, err := s.logic.FindAll(c)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"code": 1,
+			"msg":  "参数异常:" + err.Error(),
+			"data": gin.H{},
+		})
+		return
+	}
+
 	c.JSON(200, gin.H{
 		"code": 0,
 		"msg":  "success",

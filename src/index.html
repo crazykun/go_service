@@ -20,7 +20,7 @@
     <script src="//unpkg.com/layui@2.9.8/dist/layui.js"></script>
     <script src="//unpkg.com/jquery@3.7.1/dist/jquery.js"></script>
     <script>
-        var base_url = 'http://localhost:10000/service'
+        var base_url = 'http://localhost:10000/'
 
         layui.use('element', function () {
             var element = layui.element;
@@ -32,7 +32,7 @@
             table.render({
                 elem: '#demo'
                 , height: 800
-                , url: base_url + '/all' //数据接口
+                , url: base_url + 'service/all' //数据接口
                 , page: false //开启分页
                 , cols: [[ //表头
                     { field: 'id', title: 'ID', width: "2%" }
@@ -136,71 +136,28 @@
                             id: 'del'
                         }],
                         click: function (menudata) {
-                            if (menudata.id === 'detail') {
+                            if ('detail' == menudata.id) {
                                 layer.msg('查看操作，当前行 ID:' + data.id);
                             } else if (menudata.id === 'del') {
                                 layer.confirm('确定删除吗？', function (index) {
                                     //点击确认时执行
-                                    $.ajax({
-                                        url: base_url + '/delete/' + data.id,
-                                        type: 'POST',
-                                        success: function (r) {
-                                            if (r.code == 0) {
-                                                location.reload();
-                                            } else {
-                                                layer.alert(r.msg)
-                                            }
-                                        }
-                                    })
-                                    layer.close(index);
+                                    operation(index, data.id, 'service/delete/');                               
                                 });
                             } else if ('start' == menudata.id) {
-                                layer.confirm('确定删除吗？', function (index) {
-                                    //点击确认时执行
-                                    $.ajax({
-                                        url: base_url + '/delete/' + data.id,
-                                        type: 'POST',
-                                        success: function (r) {
-                                            if (r.code == 0) {
-                                                location.reload();
-                                            } else {
-                                                layer.alert(r.msg)
-                                            }
-                                        }
-                                    })
-                                    layer.close(index);
+                                layer.confirm('确定执行启动命令吗？', function (index) {
+                                    operation(index, data.id, 'cmd/start/');                              
                                 });
                             } else if ('stop' == menudata.id) {
-                                layer.confirm('确定删除吗？', function (index) {
-                                    //点击确认时执行
-                                    $.ajax({
-                                        url: base_url + '/delete/' + data.id,
-                                        type: 'POST',
-                                        success: function (r) {
-                                            if (r.code == 0) {
-                                                location.reload();
-                                            } else {
-                                                layer.alert(r.msg)
-                                            }
-                                        }
-                                    })
-                                    layer.close(index);
+                                layer.confirm('确定执行停止命令吗？', function (index) {
+                                    operation(index, data.id, 'cmd/stop/');
                                 });
                             } else if ('restart' == menudata.id) {
-                                layer.confirm('确定删除吗？', function (index) {
-                                    //点击确认时执行
-                                    $.ajax({
-                                        url: base_url + '/delete/' + data.id,
-                                        type: 'POST',
-                                        success: function (r) {
-                                            if (r.code == 0) {
-                                                location.reload();
-                                            } else {
-                                                layer.alert(r.msg)
-                                            }
-                                        }
-                                    })
-                                    layer.close(index);
+                                layer.confirm('确定重启吗？', function (index) {
+                                    operation(index, data.id, 'cmd/restart/');
+                                });
+                            } else if ('focred_restart' == menudata.id) {
+                                layer.confirm('确定强制重启吗？', function (index) {
+                                    operation(index, data.id, 'cmd/forcedRestart/');
                                 });
                             }
                         },
@@ -323,6 +280,21 @@
                     }
                 }
             })
+        }
+
+        function operation(index, id, cmd) {
+            $.ajax({
+                url: base_url + cmd + id,
+                type: 'POST',
+                success: function (r) {
+                    if (r.code == 0) {
+                        location.reload();
+                    } else {
+                        layer.alert(r.msg)
+                    }
+                }
+            })
+            layer.close(index);
         }
     </script>
     <script type="text/html" id="bar">

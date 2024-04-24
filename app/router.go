@@ -29,14 +29,23 @@ func RunHttp() {
 	r.GET("/", controller.NewServiceController().Index)
 
 	//路由组
-	appInfoGroup := r.Group("/service")
+	serviceGroup := r.Group("/service")
 	{
-		appInfoGroup.POST("/add", controller.NewServiceController().Add)
-		appInfoGroup.GET("/findById/:id", controller.NewServiceController().FindById)
-		appInfoGroup.GET("/findByName/:key", controller.NewServiceController().FindByName)
-		appInfoGroup.POST("/delete/:id", controller.NewServiceController().DeleteById)
-		appInfoGroup.GET("/all", controller.NewServiceController().FindAll)
-		appInfoGroup.POST("/update", controller.NewServiceController().Update)
+		serviceGroup.POST("/add", controller.NewServiceController().Add)
+		serviceGroup.GET("/findById/:id", controller.NewServiceController().FindById)
+		serviceGroup.GET("/findByName/:key", controller.NewServiceController().FindByName)
+		serviceGroup.POST("/delete/:id", controller.NewServiceController().DeleteById)
+		serviceGroup.GET("/all", controller.NewServiceController().FindAll)
+		serviceGroup.POST("/update", controller.NewServiceController().Update)
 	}
+
+	cmdGroup := r.Group("/cmd")
+	{
+		cmdGroup.POST("/start/:id", controller.NewCmdController().Start)
+		cmdGroup.POST("/stop/:id", controller.NewCmdController().Stop)
+		cmdGroup.POST("/restart/:id", controller.NewCmdController().Restart)
+		cmdGroup.POST("/forcedRestart/:id", controller.NewCmdController().ForcedRestart)
+	}
+
 	r.Run("127.0.0.1:" + config.Config.Port)
 }
