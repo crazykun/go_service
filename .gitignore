@@ -1,1 +1,3 @@
 go_service
+logs/*
+!.gitkeep
