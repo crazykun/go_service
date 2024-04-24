@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>服务管理</title>
+    <link href="//unpkg.com/layui@2.9.8/dist/css/layui.css" rel="stylesheet">
+</head>
+
+<body>
+    <div style="width: 90%; left: 5%;position: absolute;top: 30px;">
+        <blockquote class="layui-elem-quote layui-text">
+            服务管理
+            <button class="layui-btn layui-btn-xs" id="add_btn" style="float: right; margin-bottom: 2px;"
+                lay-filter="add_btn">添加</button>
+        </blockquote>
+        <table id="demo" lay-filter="test"></table>
+    </div>
+    <script src="//unpkg.com/layui@2.9.8/dist/layui.js"></script>
+    <script src="//unpkg.com/jquery@3.7.1/dist/jquery.js"></script>
+    <script>
+        var base_url = 'http://localhost:10000/service'
+
+        layui.use('element', function () {
+            var element = layui.element;
+        });
+        layui.use(['table', 'dropdown'], function () {
+            var table = layui.table;
+            var dropdown = layui.dropdown;
+            //第一个实例
+            table.render({
+                elem: '#demo'
+                , height: 800
+                , url: base_url + '/all' //数据接口
+                , page: false //开启分页
+                , cols: [[ //表头
+                    { field: 'id', title: 'ID', width: "2%" }
+                    , { field: 'title', title: '中文名称' }
+                    , { field: 'name', title: '英文标识' }
+                    , { field: 'dir', title: '目录' }
+                    , { field: 'cmd_start', title: '启动' }
+                    , { field: 'cmd_stop', title: '关闭' }
+                    , { field: 'cmd_restart', title: '重启' }
+                    , { field: 'port', title: '端口', sort: true }
+                    , { field: 'status', title: '状态', width:"2%", templet: function (d) { return d.status == 1 ? '<i class="layui-icon layui-icon-play" style="color: #16baaa; font-size:24px" title="运行中"></i>' : '<i class="layui-icon layui-icon-pause" style="font-size: 24px; color: red;" title="停止"></i>' }}
+                    , { field: 'pid', title: 'pid' }
+                    , { field: 'process', title: '进程' }
+                    , { field: 'remark', title: '备注' }
+                    , { title: '操作', toolbar: '#bar'}
+                ]]
+            });
+            //工具条事件
+            table.on('tool(test)', function (obj) {
+                var data = obj.data;
+                var layEvent = obj.event;
+                var tr = obj.tr;
+                if ('edit' == layEvent) {
+                    layer.open({
+                        title: '编辑',
+                        type: 1,
+                        content: '<form class="layui-form" style="margin-top: 10px;margin-right: 60px;">' +
+                            '  <div class="layui-form-item">\n' +
+                            '    <label class="layui-form-label">中文名称</label>\n' +
+                            '    <div class="layui-input-inline">\n' +
+                            '      <input type="text" class="layui-input" id="u_title" value="' + data.title + '">\n' +
+                            '    </div>\n' +
+                            '  </div>' +
+                            '  <div class="layui-form-item">\n' +
+                            '    <label class="layui-form-label">英文标识</label>\n' +
+                            '    <div class="layui-input-inline">\n' +
+                            '      <input type="text" class="layui-input" id="u_name" value="' + data.name + '">\n' +
+                            '    </div>\n' +
+                            '  </div>' +
+                            '  <div class="layui-form-item">\n' +
+                            '    <label class="layui-form-label">目录</label>\n' +
+                            '    <div class="layui-input-inline">\n' +
+                            '      <input type="text" class="layui-input" id="u_dir" value="' + data.dir + '">\n' +
+                            '    </div>\n' +
+                            '  </div>' +
+                            '  <div class="layui-form-item">\n' +
+                            '    <label class="layui-form-label">启动</label>\n' +
+                            '    <div class="layui-input-inline">\n' +
+                            '      <input type="text"  class="layui-input" id="u_cmd_start" value="' + data.cmd_start + '">\n' +
+                            '    </div>\n' +
+                            '  </div>' +
+                            '  <div class="layui-form-item">\n' +
+                            '    <label class="layui-form-label">关闭</label>\n' +
+                            '    <div class="layui-input-inline">\n' +
+                            '      <input type="text"  class="layui-input" id="u_cmd_stop" value="' + data.cmd_stop + '">\n' +
+                            '    </div>\n' +
+                            '  </div>' +
+                            '  <div class="layui-form-item">\n' +
+                            '    <label class="layui-form-label">重启</label>\n' +
+                            '    <div class="layui-input-inline">\n' +
+                            '      <input type="text"  class="layui-input" id="u_cmd_restart" value="' + data.cmd_restart + '">\n' +
+                            '    </div>\n' +
+                            '  </div>' +
+                            '  <div class="layui-form-item">\n' +
+                            '    <label class="layui-form-label">端口</label>\n' +
+                            '    <div class="layui-input-inline">\n' +
+                            '      <input type="text"  class="layui-input" id="u_port" value="' + data.port + '">\n' +
+                            '    </div>\n' +
+                            '  </div>' +
+                            '  <div class="layui-form-item">\n' +
+                            '    <label class="layui-form-label">备注</label>\n' +
+                            '    <div class="layui-input-inline">\n' +
+                            '      <input type="text"  class="layui-input" id="u_remark" value="' + data.remark + '">\n' +
+                            '    </div>\n' +
+                            '  </div>' +
+                            '<div class="layui-form-item">\n' +
+                            '    <div class="layui-input-block">\n' +
+                            '      <button class="layui-btn" type="button" onclick="update()">确定修改</button>\n' +
+                            '      <button type="reset" class="layui-btn layui-btn-primary">重置</button>\n' +
+                            '    </div>\n' +
+                            '  </div>' +
+                            '  <input style="display: none;" id="u_id" value="' + data.id + '">' +
+                            '</form>'
+                    });
+                } else if ('more' == layEvent) {
+                    // 更多 - 下拉菜单
+                    dropdown.render({
+                        elem: this, // 触发事件的 DOM 对象
+                        show: true, // 外部事件触发即显示
+                        data: [{
+                            title: '启动',
+                            id: 'start'
+                        }, {
+                            title: '关闭',
+                            id: 'stop'
+                        }, {
+                            title: '重启',
+                            id: 'restart'
+                        }, {
+                            title: '删除',
+                            id: 'del'
+                        }],
+                        click: function (menudata) {
+                            if (menudata.id === 'detail') {
+                                layer.msg('查看操作，当前行 ID:' + data.id);
+                            } else if (menudata.id === 'del') {
+                                layer.confirm('确定删除吗？', function (index) {
+                                    //点击确认时执行
+                                    $.ajax({
+                                        url: base_url + '/delete/' + data.id,
+                                        type: 'POST',
+                                        success: function (r) {
+                                            if (r.code == 0) {
+                                                location.reload();
+                                            } else {
+                                                layer.alert(r.msg)
+                                            }
+                                        }
+                                    })
+                                    layer.close(index);
+                                });
+                            } else if ('start' == menudata.id) {
+                                layer.confirm('确定删除吗？', function (index) {
+                                    //点击确认时执行
+                                    $.ajax({
+                                        url: base_url + '/delete/' + data.id,
+                                        type: 'POST',
+                                        success: function (r) {
+                                            if (r.code == 0) {
+                                                location.reload();
+                                            } else {
+                                                layer.alert(r.msg)
+                                            }
+                                        }
+                                    })
+                                    layer.close(index);
+                                });
+                            } else if ('stop' == menudata.id) {
+                                layer.confirm('确定删除吗？', function (index) {
+                                    //点击确认时执行
+                                    $.ajax({
+                                        url: base_url + '/delete/' + data.id,
+                                        type: 'POST',
+                                        success: function (r) {
+                                            if (r.code == 0) {
+                                                location.reload();
+                                            } else {
+                                                layer.alert(r.msg)
+                                            }
+                                        }
+                                    })
+                                    layer.close(index);
+                                });
+                            } else if ('restart' == menudata.id) {
+                                layer.confirm('确定删除吗？', function (index) {
+                                    //点击确认时执行
+                                    $.ajax({
+                                        url: base_url + '/delete/' + data.id,
+                                        type: 'POST',
+                                        success: function (r) {
+                                            if (r.code == 0) {
+                                                location.reload();
+                                            } else {
+                                                layer.alert(r.msg)
+                                            }
+                                        }
+                                    })
+                                    layer.close(index);
+                                });
+                            }
+                        },
+                        align: 'right', // 右对齐弹出
+                        style: 'box-shadow: 1px 1px 10px rgb(0 0 0 / 12%);' // 设置额外样式
+                    })
+
+                }
+            });
+        });
+
+        $('#add_btn').on('click', function () {
+            layer.open({
+                title: '添加',
+                type: 1,
+                content: '<form class="layui-form" style="margin-top: 20px;margin-right: 60px;">' +
+                    '  <div class="layui-form-item">\n' +
+                    '    <label class="layui-form-label">中文名称</label>\n' +
+                    '    <div class="layui-input-inline">\n' +
+                    '      <input type="text" class="layui-input" id="i_title" value="">\n' +
+                    '    </div>\n' +
+                    '  </div>' +
+                    '  <div class="layui-form-item">\n' +
+                    '    <label class="layui-form-label">英文标识</label>\n' +
+                    '    <div class="layui-input-inline">\n' +
+                    '      <input type="text" class="layui-input" id="i_name" value="">\n' +
+                    '    </div>\n' +
+                    '  </div>' +
+                    '  <div class="layui-form-item">\n' +
+                    '    <label class="layui-form-label">目录</label>\n' +
+                    '    <div class="layui-input-inline">\n' +
+                    '      <input type="text" class="layui-input" id="i_dir" value="">\n' +
+                    '    </div>\n' +
+                    '  </div>' +
+                    '  <div class="layui-form-item">\n' +
+                    '    <label class="layui-form-label">启动</label>\n' +
+                    '    <div class="layui-input-inline">\n' +
+                    '      <input type="text"  class="layui-input" id="i_cmd_start" value="">\n' +
+                    '    </div>\n' +
+                    '  </div>' +
+                    '  <div class="layui-form-item">\n' +
+                    '    <label class="layui-form-label">关闭</label>\n' +
+                    '    <div class="layui-input-inline">\n' +
+                    '      <input type="text"  class="layui-input" id="i_cmd_stop" value="">\n' +
+                    '    </div>\n' +
+                    '  </div>' +
+                    '  <div class="layui-form-item">\n' +
+                    '    <label class="layui-form-label">重启</label>\n' +
+                    '    <div class="layui-input-inline">\n' +
+                    '      <input type="text"  class="layui-input" id="i_cmd_restart" value="">\n' +
+                    '    </div>\n' +
+                    '  </div>' +
+                    '  <div class="layui-form-item">\n' +
+                    '    <label class="layui-form-label">端口</label>\n' +
+                    '    <div class="layui-input-inline">\n' +
+                    '      <input type="text"  class="layui-input" id="i_port" value="">\n' +
+                    '    </div>\n' +
+                    '  </div>' +
+                    '  <div class="layui-form-item">\n' +
+                    '    <label class="layui-form-label">备注</label>\n' +
+                    '    <div class="layui-input-inline">\n' +
+                    '      <input type="text"  class="layui-input" id="i_remark" value="">\n' +
+                    '    </div>\n' +
+                    '  </div>' +
+                    '<div class="layui-form-item">\n' +
+                    '    <div class="layui-input-block">\n' +
+                    '      <button class="layui-btn" type="button" onclick="add()">确定修改</button>\n' +
+                    '      <button type="reset" class="layui-btn layui-btn-primary">重置</button>\n' +
+                    '    </div>\n' +
+                    '  </div>' +
+                    '</form>'
+            });
+        });
+    </script>
+    <script>
+        function add() {
+            var title = $("#i_title").val();
+            var name = $("#i_name").val();
+            var dir = $("#i_dir").val();
+            var cmd_start = $("#i_cmd_start").val();
+            var cmd_stop = $("#i_cmd_stop").val();
+            var cmd_restart = $("#i_cmd_restart").val();
+            var port = $("#i_port").val();
+            var remark = $("#i_remark").val();
+            $.ajax({
+                url: base_url + '/add',
+                type: 'POST',
+                data: JSON.stringify({ "title": title, "name": name, "dir": dir, "cmd_start": cmd_start, "cmd_stop": cmd_stop, "cmd_restart": cmd_restart, "port": parseInt(port), "remark": remark }),
+                contentType: 'application/json',
+                success: function (r) {
+                    if (r.code == 0) {
+                        location.reload();
+                    } else {
+                        layer.alert(r.msg)
+                    }
+                }
+            })
+        }
+
+        function update() {
+            var id = $("#u_id").val();
+            var title = $("#u_title").val();
+            var name = $("#u_name").val();
+            var dir = $("#u_dir").val();
+            var cmd_start = $("#u_cmd_start").val();
+            var cmd_stop = $("#u_cmd_stop").val();
+            var cmd_restart = $("#u_cmd_restart").val();
+            var port = $("#u_port").val();
+            var remark = $("#u_remark").val();
+            $.ajax({
+                url: base_url + '/update',
+                type: 'POST',
+                data: JSON.stringify({ "id": parseInt(id), "title": title, "name": name, "dir": dir, "cmd_start": cmd_start, "cmd_stop": cmd_stop, "cmd_restart": cmd_restart, "port": parseInt(port), "remark": remark }),
+                contentType: 'application/json',
+                success: function (r) {
+                    if (r.code == 0) {
+                        location.reload();
+                    } else {
+                        layer.alert(r.msg)
+                    }
+                }
+            })
+        }
+    </script>
+    <script type="text/html" id="bar">
+        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-xs" lay-event="more">
+            更多 
+            <i class="layui-icon layui-icon-down"></i>
+        </a>
+    </script>
+</body>
+
+</html>
