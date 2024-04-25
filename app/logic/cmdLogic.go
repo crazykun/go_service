@@ -26,17 +26,16 @@ func (l Logic) Start(ctx context.Context, id int64) (string, error) {
 	}
 
 	if strings.Contains(info.CmdStart, "php") {
+		info.CmdStart = strings.ReplaceAll(info.CmdStart, "  ", " ")
 		args := strings.Split(info.CmdStart, " ")
 		cmd := exec.Command(args[0], args[1:]...)
-		cmd.Dir = "/data/zhw/zhw_quick_qq"
+		cmd.Dir = info.Dir
 		output, err := cmd.CombinedOutput()
-		fmt.Println("Command output:", string(output))
 		if err != nil {
-			fmt.Println("Command execution error:", err)
-			return "", fmt.Errorf(string(output), err)
+			outstr := strings.ReplaceAll(string(output), "\n", "\n<br/>")
+			return "", fmt.Errorf(err.Error(), "<br>", outstr)
 		}
-		fmt.Println("Command output:", string(output))
-		return string(output), err
+		return string(output), nil
 	} else {
 		cmd := exec.Command("bash", "-c", info.CmdStart)
 		cmd.Dir = info.Dir
@@ -66,15 +65,17 @@ func (l Logic) Stop(ctx context.Context, id int64) (string, error) {
 		return utils.Kill(port)
 	} else {
 		// 进入目录并启动服务
+		info.CmdStart = strings.ReplaceAll(info.CmdStart, "  ", " ")
 		args := strings.Split(info.CmdStart, " ")
 		cmd := exec.Command(args[0], args[1:]...)
 		cmd.Dir = info.Dir
 
-		out, err := cmd.CombinedOutput()
+		output, err := cmd.CombinedOutput()
 		if err != nil {
-			return "", err
+			outstr := strings.ReplaceAll(string(output), "\n", "\n<br/>")
+			return "", fmt.Errorf(err.Error(), "<br>", outstr)
 		}
-		return string(out), nil
+		return string(output), nil
 	}
 }
 
