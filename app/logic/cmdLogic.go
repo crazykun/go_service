@@ -86,8 +86,8 @@ func (l Logic) Restart(ctx context.Context, id int64) (string, error) {
 	}
 	port := strconv.Itoa(int(info.Port))
 	isUse, _ := utils.IsPortInUse(port)
-	if isUse {
-		return "", errors.New("port is in use")
+	if !isUse {
+		return "", errors.New("port is not use")
 	}
 	// 进入目录并启动服务
 	args := strings.Split(info.CmdRestart, " ")
