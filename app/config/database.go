@@ -20,12 +20,12 @@ func InitDatabase() error {
 		// 初始化数据库客户端
 		db, err := InitMysqlClient(v.Host, v.Port, v.User, v.Pwd, v.Name)
 		if err != nil {
-			return fmt.Errorf("init mysql" + k + " client failed:" + err.Error())
+			panic(fmt.Errorf("init mysql" + k + " client failed:" + err.Error()))
 		}
 		DatabaseClient[k] = db
 		sqlDB, err := db.DB()
 		if err != nil {
-			return fmt.Errorf("get mysql" + k + " sqlDB failed:" + err.Error())
+			panic("get mysql" + k + " sqlDB failed:" + err.Error())
 		}
 		// 设置连接池
 		if v.MaxIdle > 0 {

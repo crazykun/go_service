@@ -35,7 +35,7 @@
                 , url: base_url + 'service/all' //数据接口
                 , page: false //开启分页
                 , cols: [[ //表头
-                    { field: 'id', title: 'ID', width: "2%" }
+                    { field: 'id', title: 'ID', width: "2%", sort: true}
                     , { field: 'title', title: '中文名称' }
                     , { field: 'name', title: '英文标识' }
                     , { field: 'dir', title: '目录' }
@@ -132,6 +132,12 @@
                             title: '重启',
                             id: 'restart'
                         }, {
+                            title: '强制重启',
+                            id: 'restart'
+                        }, {
+                            title: '强杀',
+                            id: 'kill'
+                        }, {
                             title: '删除',
                             id: 'del'
                         }],
@@ -158,6 +164,10 @@
                             } else if ('focred_restart' == menudata.id) {
                                 layer.confirm('确定强制重启吗？', function (index) {
                                     operation(index, data.id, 'cmd/forcedRestart/');
+                                });
+                            } else if ('kill' == menudata.id) {
+                                layer.confirm('确定强制关闭吗？', function (index) {
+                                    operation(index, data.id, 'cmd/kill/');
                                 });
                             }
                         },
@@ -243,7 +253,7 @@
             var port = $("#i_port").val();
             var remark = $("#i_remark").val();
             $.ajax({
-                url: base_url + '/add',
+                url: base_url + 'service/add',
                 type: 'POST',
                 data: JSON.stringify({ "title": title, "name": name, "dir": dir, "cmd_start": cmd_start, "cmd_stop": cmd_stop, "cmd_restart": cmd_restart, "port": parseInt(port), "remark": remark }),
                 contentType: 'application/json',
@@ -268,7 +278,7 @@
             var port = $("#u_port").val();
             var remark = $("#u_remark").val();
             $.ajax({
-                url: base_url + '/update',
+                url: base_url + 'service/update',
                 type: 'POST',
                 data: JSON.stringify({ "id": parseInt(id), "title": title, "name": name, "dir": dir, "cmd_start": cmd_start, "cmd_stop": cmd_stop, "cmd_restart": cmd_restart, "port": parseInt(port), "remark": remark }),
                 contentType: 'application/json',

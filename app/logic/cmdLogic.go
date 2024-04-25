@@ -18,32 +18,37 @@ func (l Logic) Start(ctx context.Context, id int64) (string, error) {
 	port := strconv.Itoa(int(info.Port))
 	isUse, _ := utils.IsPortInUse(port)
 	if isUse {
-		// portList, _ := utils.GetPortList()
-		// fmt.Println(portList[port])
 		return "", errors.New("port is in use")
 	}
-	// 进入目录并启动服务 info.CmdStart =  php easyswoole server start -d
-	args := strings.Split(info.CmdStart, " ")
-	cmd := exec.Command(args[0], args[1:]...)
-	// 设置工作目录
-	cmd.Dir = info.Dir
-	// 判断如果命令是php开头, 先查询php的路径
-	if strings.HasPrefix(args[0], "php") {
-		phpPath, err := exec.LookPath(args[0])
+
+	if info.CmdStart == "" {
+		return "", errors.New("start command not found")
+	}
+
+	if strings.Contains(info.CmdStart, "php") {
+		args := strings.Split(info.CmdStart, " ")
+		cmd := exec.Command(args[0], args[1:]...)
+		cmd.Dir = info.Dir
+		output, err := cmd.CombinedOutput()
+		fmt.Println("Command output:", string(output))
 		if err != nil {
-			return "", err
+			fmt.Println("Command execution error:", err)
+			return string(output), err
 		}
-		if phpPath == "" {
-			return "", errors.New(args[0] + " not found ")
+		fmt.Println("Command output:", string(output))
+		return string(output), err
+	} else {
+		cmd := exec.Command("sh", "-c", info.CmdStart)
+		cmd.Dir = info.Dir
+		output, err := cmd.CombinedOutput()
+		fmt.Println("Command output:", string(output))
+		if err != nil {
+			fmt.Println("Command execution error:", err)
+			return string(output), err
 		}
-		cmd.Path = phpPath
+		fmt.Println("Command output:", string(output))
+		return string(output), err
 	}
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Println("Command output:", string(out))
-		return "", err
-	}
-	return string(out), nil
 }
 
 func (l Logic) Stop(ctx context.Context, id int64) (string, error) {
@@ -53,18 +58,24 @@ func (l Logic) Stop(ctx context.Context, id int64) (string, error) {
 	}
 	port := strconv.Itoa(int(info.Port))
 	isUse, _ := utils.IsPortInUse(port)
-	if isUse {
-		return "", errors.New("port is in use")
+	if !isUse {
+		return "", errors.New("port is not in use")
 	}
-	// 进入目录并启动服务
-	cmd := exec.Command(info.CmdStart)
-	cmd.Dir = info.Dir
 
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return "", err
+	if info.CmdStop == "" {
+		return utils.Kill(port)
+	} else {
+		// 进入目录并启动服务
+		args := strings.Split(info.CmdStart, " ")
+		cmd := exec.Command(args[0], args[1:]...)
+		cmd.Dir = info.Dir
+
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			return "", err
+		}
+		return string(out), nil
 	}
-	return string(out), nil
 }
 
 func (l Logic) Restart(ctx context.Context, id int64) (string, error) {
@@ -78,7 +89,8 @@ func (l Logic) Restart(ctx context.Context, id int64) (string, error) {
 		return "", errors.New("port is in use")
 	}
 	// 进入目录并启动服务
-	cmd := exec.Command(info.CmdStart)
+	args := strings.Split(info.CmdRestart, " ")
+	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Dir = info.Dir
 
 	out, err := cmd.CombinedOutput()
@@ -96,10 +108,12 @@ func (l Logic) ForcedRestart(ctx context.Context, id int64) (string, error) {
 	port := strconv.Itoa(int(info.Port))
 	isUse, _ := utils.IsPortInUse(port)
 	if isUse {
-		return "", errors.New("port is in use")
+		utils.Kill(port)
 	}
+
 	// 进入目录并启动服务
-	cmd := exec.Command(info.CmdStart)
+	args := strings.Split(info.CmdStart, " ")
+	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Dir = info.Dir
 
 	out, err := cmd.CombinedOutput()
@@ -107,4 +121,15 @@ func (l Logic) ForcedRestart(ctx context.Context, id int64) (string, error) {
 		return "", err
 	}
 	return string(out), nil
+}
+
+func (l Logic) Kill(ctx context.Context, id int64) (string, error) {
+	info := l.GetById(ctx, id)
+	if info.Id == 0 {
+		return "", errors.New("service not found")
+	}
+	port := strconv.Itoa(int(info.Port))
+	// 查询进程号
+	out, err := utils.Kill(port)
+	return string(out), err
 }

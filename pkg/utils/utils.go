@@ -1,10 +1,18 @@
 package utils
 
 import (
+	"errors"
+	"go_service/app/config"
 	"net"
+	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 )
+
+func IntToString(i int) string {
+	return strconv.Itoa(i)
+}
 
 // IsPortInUse 检查指定端口是否正在使用
 func IsPortInUse(port string) (bool, error) {
@@ -23,6 +31,7 @@ func GetPortList() (map[string]map[string]interface{}, error) {
 	}
 	outList := strings.Split(string(out), "\n")
 	outList = outList[2:]
+	cpid := os.Getpid()
 	for _, line := range outList {
 		if strings.Contains(line, "LISTEN") {
 			parts := strings.Fields(line)
@@ -37,6 +46,9 @@ func GetPortList() (map[string]map[string]interface{}, error) {
 			if len(process) != 2 {
 				pid = ""
 				process_name = ""
+			} else if IntToString(cpid) == process[0] && port != config.Config.Port {
+				pid = "0"
+				process_name = "start....."
 			} else {
 				pid = process[0]
 				process_name = process[1]
@@ -48,4 +60,24 @@ func GetPortList() (map[string]map[string]interface{}, error) {
 		}
 	}
 	return portList, nil
+}
+
+func Kill(port string) (string, error) {
+	// 查询进程号
+	portList, _ := GetPortList()
+	if _, ok := portList[port]; !ok {
+		return "", errors.New("port not in use")
+	}
+
+	pid := portList[port]["pid"].(string)
+	if pid == "" {
+		return "", errors.New("service not running")
+	}
+
+	cmd := exec.Command("kill", "-9", pid)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", err
+	}
+	return string(out), nil
 }

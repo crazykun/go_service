@@ -45,6 +45,7 @@ func RunHttp() {
 		cmdGroup.POST("/stop/:id", controller.NewCmdController().Stop)
 		cmdGroup.POST("/restart/:id", controller.NewCmdController().Restart)
 		cmdGroup.POST("/forcedRestart/:id", controller.NewCmdController().ForcedRestart)
+		cmdGroup.POST("/kill/:id", controller.NewCmdController().Kill)
 	}
 
 	r.Run("127.0.0.1:" + config.Config.Port)
