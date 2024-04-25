@@ -28,17 +28,17 @@ func (l Logic) Start(ctx context.Context, id int64) (string, error) {
 	if strings.Contains(info.CmdStart, "php") {
 		args := strings.Split(info.CmdStart, " ")
 		cmd := exec.Command(args[0], args[1:]...)
-		cmd.Dir = info.Dir
+		cmd.Dir = "/data/zhw/zhw_quick_qq"
 		output, err := cmd.CombinedOutput()
 		fmt.Println("Command output:", string(output))
 		if err != nil {
 			fmt.Println("Command execution error:", err)
-			return string(output), err
+			return "", fmt.Errorf(string(output), err)
 		}
 		fmt.Println("Command output:", string(output))
 		return string(output), err
 	} else {
-		cmd := exec.Command("sh", "-c", info.CmdStart)
+		cmd := exec.Command("bash", "-c", info.CmdStart)
 		cmd.Dir = info.Dir
 		output, err := cmd.CombinedOutput()
 		fmt.Println("Command output:", string(output))
