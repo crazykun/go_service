@@ -25,7 +25,7 @@ func RunHttp() {
 	//静态文件
 	r.Static("/static", "./static")
 	//模板文件
-	r.LoadHTMLGlob("src/*")
+	r.LoadHTMLGlob("template/*")
 	r.GET("/", controller.NewServiceController().Index)
 
 	//路由组
