@@ -1,6 +1,6 @@
 # go_service
 
-This is a service written in Go. It is a simple service that listens on a port and returns a JSON response. You can execute the command to start or restart service inside the page.
+This is a service written in Go. It is a simple service that listens on some ports and returns a JSON response. You can execute the command to start or restart service inside the page.
 
 English | [简体中文](README.zh-CN.md)
 
