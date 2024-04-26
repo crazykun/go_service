@@ -1,6 +1,8 @@
 # go_service
 
-This is a service written in Go. It is a simple service that listens on a port and returns a JSON response.
+This is a service written in Go. It is a simple service that listens on a port and returns a JSON response. You can execute the command to start or restart service inside the page.
+
+English | [简体中文](README.zh-CN.md)
 
 ## Features
 
@@ -8,10 +10,11 @@ This is a service written in Go. It is a simple service that listens on a port a
 - Returns port number and process info
 - Logs the request to the console
 
-
 ## Installation
 
-Clone the repository into your Go workspace
+```bash
+go get github.com/crazykun/go_service
+```
 
 ## Usage
 
@@ -21,7 +24,6 @@ go run main.go
 # or
 ./restart.sh
 ```
-
 
 ## Screenshots
 
