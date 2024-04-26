@@ -1,6 +1,7 @@
 package config
 
 import (
+	"flag"
 	"fmt"
 	"os"
 
@@ -43,7 +44,14 @@ type redis struct {
 func InitConfig() {
 	AppPath, _ = os.Getwd()
 
-	RunMode = "config.yml"
+	// 从启动命令里面读取-c参数指定的配置文件
+	// go run main.go -c config.yml
+	flag.StringVar(&RunMode, "c", "config.yml", "specify config file")
+	flag.Parse()
+	// 读取配置文件
+	if RunMode == "" {
+		RunMode = "config.yml"
+	}
 	viper.SetConfigName(RunMode)       //配置文件名
 	viper.SetConfigType("yml")         //配置文件类型
 	viper.AddConfigPath(AppPath + "/") //执行go run对应的路径配置
