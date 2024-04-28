@@ -24,7 +24,7 @@ func (s CmdController) Start(c *gin.Context) {
 	if err != nil {
 		c.JSON(200, gin.H{
 			"code": 1,
-			"msg":  "启动失败:" + err.Error(),
+			"msg":  "操作失败:" + err.Error(),
 			"data": gin.H{},
 		})
 		return
@@ -43,7 +43,7 @@ func (s CmdController) Stop(c *gin.Context) {
 	if err != nil {
 		c.JSON(200, gin.H{
 			"code": 1,
-			"msg":  "启动失败:" + err.Error(),
+			"msg":  "操作失败:" + err.Error(),
 			"data": gin.H{},
 		})
 		return
@@ -62,7 +62,7 @@ func (s CmdController) Restart(c *gin.Context) {
 	if err != nil {
 		c.JSON(200, gin.H{
 			"code": 1,
-			"msg":  "启动失败:" + err.Error(),
+			"msg":  "操作失败:" + err.Error(),
 			"data": gin.H{},
 		})
 		return
@@ -81,7 +81,7 @@ func (s CmdController) ForcedRestart(c *gin.Context) {
 	if err != nil {
 		c.JSON(200, gin.H{
 			"code": 1,
-			"msg":  "启动失败:" + err.Error(),
+			"msg":  "操作失败:" + err.Error(),
 			"data": gin.H{},
 		})
 		return
@@ -100,7 +100,7 @@ func (s CmdController) Kill(c *gin.Context) {
 	if err != nil {
 		c.JSON(200, gin.H{
 			"code": 1,
-			"msg":  "启动失败:" + err.Error(),
+			"msg":  "操作失败:" + err.Error(),
 			"data": gin.H{},
 		})
 		return
