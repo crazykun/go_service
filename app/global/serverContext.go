@@ -1,4 +1,4 @@
-package config
+package global
 
 import "github.com/gin-gonic/gin"
 

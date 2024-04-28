@@ -1,16 +1,16 @@
 package app
 
 import (
-	"go_service/app/config"
 	"go_service/app/controller"
+	"go_service/app/global"
 	"go_service/app/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
 func RunHttp() {
-	config.InitConfig()
-	config.InitDatabase()
+	global.InitConfig()
+	global.InitDatabase()
 
 	r := gin.Default()
 	// 捕获异常
@@ -48,5 +48,5 @@ func RunHttp() {
 		cmdGroup.POST("/kill/:id", controller.NewCmdController().Kill)
 	}
 
-	r.Run("127.0.0.1:" + config.Config.Port)
+	r.Run("127.0.0.1:" + global.Config.Port)
 }

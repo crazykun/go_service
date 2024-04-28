@@ -1,7 +1,7 @@
 package logic
 
 import (
-	"go_service/app/config"
+	"go_service/app/global"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -14,5 +14,5 @@ type Logic struct {
 
 // NewLogic
 func NewLogic() *Logic {
-	return &Logic{c: config.ServerContext, db: config.GetDefaultDb()}
+	return &Logic{c: global.ServerContext, db: global.GetDefaultDb()}
 }

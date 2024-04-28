@@ -2,7 +2,7 @@ package utils
 
 import (
 	"errors"
-	"go_service/app/config"
+	"go_service/app/global"
 	"net"
 	"os"
 	"os/exec"
@@ -46,7 +46,7 @@ func GetPortList() (map[string]map[string]interface{}, error) {
 			if len(process) != 2 {
 				pid = ""
 				process_name = ""
-			} else if IntToString(cpid) == process[0] && port != config.Config.Port {
+			} else if IntToString(cpid) == process[0] && port != global.Config.Port {
 				pid = "0"
 				process_name = "start....."
 			} else {
