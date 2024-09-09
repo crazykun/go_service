@@ -9,6 +9,6 @@ database:
     port: 3306
     user: root
     pwd: 123456
-    name: test
+    name: go_service
     maxIdle: 10
     maxOpen: 100

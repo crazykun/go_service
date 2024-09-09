@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"syscall"
 )
 
 func (l Logic) Start(ctx context.Context, id int64) (string, error) {
@@ -29,6 +30,10 @@ func (l Logic) Start(ctx context.Context, id int64) (string, error) {
 		info.CmdStart = strings.ReplaceAll(info.CmdStart, "  ", " ")
 		args := strings.Split(info.CmdStart, " ")
 		cmd := exec.Command(args[0], args[1:]...)
+		// 设置子进程独立于父进程
+		cmd.SysProcAttr = &syscall.SysProcAttr{
+			Setpgid: true, // 创建新进程组，子进程不再依赖父进程
+		}
 		cmd.Dir = info.Dir
 		output, err := cmd.CombinedOutput()
 		if err != nil {
@@ -39,6 +44,11 @@ func (l Logic) Start(ctx context.Context, id int64) (string, error) {
 	} else {
 		cmd := exec.Command("bash", "-c", info.CmdStart)
 		cmd.Dir = info.Dir
+		// 设置子进程独立于父进程
+		cmd.SysProcAttr = &syscall.SysProcAttr{
+			Setpgid: true, // 创建新进程组，子进程不再依赖父进程
+		}
+
 		output, err := cmd.CombinedOutput()
 		fmt.Println("Command output:", string(output))
 		if err != nil {
