@@ -1,113 +1,130 @@
 package controller
 
 import (
-	"go_service/app/logic"
+	"go_service/app/common"
+	"go_service/app/global"
+	"go_service/app/service"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 type CmdController struct {
-	logic *logic.Logic
+	commandService *service.CommandService
 }
 
 func NewCmdController() *CmdController {
 	return &CmdController{
-		logic: logic.NewLogic(),
+		commandService: service.NewCommandService(global.GetDefaultDb()),
 	}
 }
 
-func (s CmdController) Start(c *gin.Context) {
+func (s *CmdController) Start(c *gin.Context) {
 	id := c.Param("id")
-	i, _ := strconv.Atoi(id)
-	out, err := s.logic.Start(c, int64(i))
+	serviceId, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
-		c.JSON(200, gin.H{
-			"code": 1,
-			"msg":  "操作失败:" + err.Error(),
-			"data": gin.H{},
-		})
+		common.Error(c, "无效的ID参数")
 		return
 	}
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "success",
-		"data": gin.H{"result": out},
+	
+	output, err := s.commandService.StartService(c.Request.Context(), serviceId)
+	if err != nil {
+		common.HandleBusinessError(c, err)
+		return
+	}
+	
+	common.Success(c, gin.H{
+		"service_id": serviceId,
+		"operation":  "start",
+		"output":     output,
+		"message":    "启动成功",
 	})
 }
 
-func (s CmdController) Stop(c *gin.Context) {
+func (s *CmdController) Stop(c *gin.Context) {
 	id := c.Param("id")
-	i, _ := strconv.Atoi(id)
-	out, err := s.logic.Stop(c, int64(i))
+	serviceId, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
-		c.JSON(200, gin.H{
-			"code": 1,
-			"msg":  "操作失败:" + err.Error(),
-			"data": gin.H{},
-		})
+		common.Error(c, "无效的ID参数")
 		return
 	}
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "success",
-		"data": gin.H{"result": out},
+	
+	output, err := s.commandService.StopService(c.Request.Context(), serviceId)
+	if err != nil {
+		common.HandleBusinessError(c, err)
+		return
+	}
+	
+	common.Success(c, gin.H{
+		"service_id": serviceId,
+		"operation":  "stop",
+		"output":     output,
+		"message":    "停止成功",
 	})
 }
 
-func (s CmdController) Restart(c *gin.Context) {
+func (s *CmdController) Restart(c *gin.Context) {
 	id := c.Param("id")
-	i, _ := strconv.Atoi(id)
-	out, err := s.logic.Restart(c, int64(i))
+	serviceId, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
-		c.JSON(200, gin.H{
-			"code": 1,
-			"msg":  "操作失败:" + err.Error(),
-			"data": gin.H{},
-		})
+		common.Error(c, "无效的ID参数")
 		return
 	}
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "success",
-		"data": gin.H{"result": out},
+	
+	output, err := s.commandService.RestartService(c.Request.Context(), serviceId)
+	if err != nil {
+		common.HandleBusinessError(c, err)
+		return
+	}
+	
+	common.Success(c, gin.H{
+		"service_id": serviceId,
+		"operation":  "restart",
+		"output":     output,
+		"message":    "重启成功",
 	})
 }
 
-func (s CmdController) ForcedRestart(c *gin.Context) {
+func (s *CmdController) ForcedRestart(c *gin.Context) {
 	id := c.Param("id")
-	i, _ := strconv.Atoi(id)
-	out, err := s.logic.ForcedRestart(c, int64(i))
+	serviceId, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
-		c.JSON(200, gin.H{
-			"code": 1,
-			"msg":  "操作失败:" + err.Error(),
-			"data": gin.H{},
-		})
+		common.Error(c, "无效的ID参数")
 		return
 	}
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "success",
-		"data": gin.H{"result": out},
+	
+	output, err := s.commandService.ForceRestartService(c.Request.Context(), serviceId)
+	if err != nil {
+		common.HandleBusinessError(c, err)
+		return
+	}
+	
+	common.Success(c, gin.H{
+		"service_id": serviceId,
+		"operation":  "force_restart",
+		"output":     output,
+		"message":    "强制重启成功",
 	})
 }
 
-func (s CmdController) Kill(c *gin.Context) {
+func (s *CmdController) Kill(c *gin.Context) {
 	id := c.Param("id")
-	i, _ := strconv.Atoi(id)
-	out, err := s.logic.Kill(c, int64(i))
+	serviceId, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
-		c.JSON(200, gin.H{
-			"code": 1,
-			"msg":  "操作失败:" + err.Error(),
-			"data": gin.H{},
-		})
+		common.Error(c, "无效的ID参数")
 		return
 	}
-	c.JSON(200, gin.H{
-		"code": 0,
-		"msg":  "success",
-		"data": gin.H{"result": out},
+	
+	output, err := s.commandService.KillService(c.Request.Context(), serviceId)
+	if err != nil {
+		common.HandleBusinessError(c, err)
+		return
+	}
+	
+	common.Success(c, gin.H{
+		"service_id": serviceId,
+		"operation":  "kill",
+		"output":     output,
+		"message":    "强制终止成功",
 	})
 }

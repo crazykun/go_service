@@ -5,40 +5,15 @@ import (
 	"fmt"
 	"os"
 
+	"go_service/app/config"
+
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 )
 
 var RunMode string
 var AppPath string
-
-var Config struct {
-	App      string
-	Mode     string
-	Port     string
-	Redis    map[string]redis
-	Database map[string]database
-}
-
-type database struct {
-	Host    string
-	Port    int
-	User    string
-	Pwd     string
-	Name    string
-	MaxIdle int // 设置空闲连接池中的最大连接数
-	MaxOpen int // 设置最大连接数
-}
-
-type redis struct {
-	Host        string
-	Port        int
-	Pwd         string
-	Db          int
-	MaxIdle     int
-	MaxActive   int
-	IdleTimeout int
-}
+var Config config.Config
 
 // 从config目录中读取yaml环境配置
 func InitConfig() {

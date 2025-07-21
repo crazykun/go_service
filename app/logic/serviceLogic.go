@@ -3,18 +3,43 @@ package logic
 import (
 	"context"
 	"errors"
+	"fmt"
 	"go_service/app/model"
 	"go_service/pkg/utils"
 	"strconv"
 )
 
 func (l Logic) Add(ctx context.Context, info model.ServiceModel) (int64, error) {
-	var in model.ServiceModel
-	l.db.First(&in, "port", info.Port)
-	if in.Port > 0 && in.Port == info.Port { //去重
-		return 0, errors.New("port is exist")
+	// 验证必要字段
+	if info.Name == "" {
+		return 0, errors.New("服务名称不能为空")
 	}
-	l.db.Save(&info) //要使用指针
+	if info.Port <= 0 {
+		return 0, errors.New("端口号无效")
+	}
+	if info.CmdStart == "" {
+		return 0, errors.New("启动命令不能为空")
+	}
+
+	// 检查端口是否已存在
+	var existing model.ServiceModel
+	l.db.Where("port = ?", info.Port).First(&existing)
+	if existing.Id > 0 {
+		return 0, errors.New("端口已被其他服务占用")
+	}
+
+	// 检查服务名是否已存在
+	l.db.Where("name = ?", info.Name).First(&existing)
+	if existing.Id > 0 {
+		return 0, errors.New("服务名称已存在")
+	}
+
+	// 保存服务信息
+	result := l.db.Create(&info)
+	if result.Error != nil {
+		return 0, fmt.Errorf("保存服务失败: %v", result.Error)
+	}
+	
 	return info.Id, nil
 }
 
@@ -66,6 +91,27 @@ func (l Logic) GetById(ctx context.Context, id int64) model.ServiceModel {
 }
 
 func (l Logic) UpdateById(ctx context.Context, info model.ServiceModel) bool {
-	l.db.Model(&model.ServiceModel{}).Where("id", info.Id).Updates(info)
-	return true
+	// 验证必要字段
+	if info.Id <= 0 {
+		return false
+	}
+	if info.Name == "" || info.Port <= 0 || info.CmdStart == "" {
+		return false
+	}
+
+	// 检查端口是否被其他服务占用
+	var existing model.ServiceModel
+	l.db.Where("port = ? AND id != ?", info.Port, info.Id).First(&existing)
+	if existing.Id > 0 {
+		return false
+	}
+
+	// 检查服务名是否被其他服务占用
+	l.db.Where("name = ? AND id != ?", info.Name, info.Id).First(&existing)
+	if existing.Id > 0 {
+		return false
+	}
+
+	result := l.db.Model(&model.ServiceModel{}).Where("id = ?", info.Id).Updates(info)
+	return result.Error == nil && result.RowsAffected > 0
 }

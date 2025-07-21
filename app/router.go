@@ -4,6 +4,7 @@ import (
 	"go_service/app/controller"
 	"go_service/app/global"
 	"go_service/app/middleware"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,41 +13,70 @@ func RunHttp() {
 	global.InitConfig()
 	global.InitDatabase()
 
-	r := gin.Default()
-	// 捕获异常
+	// 设置Gin模式
+	if global.Config.App.Mode == "release" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
+	r := gin.New()
+
+	// 创建性能监控中间件
+
+	// 中间件
+	r.Use(gin.Recovery())
 	r.Use(middleware.ExceptErr())
-	//增加拦截器
 	r.Use(middleware.HttpInterceptor())
-	//解决跨域
 	r.Use(middleware.Cors())
-	// 服务上下文
 	r.Use(middleware.ServerContextHandler())
 
-	//静态文件
+	// 静态文件和模板
 	r.Static("/static", "./static")
-	//模板文件
 	r.LoadHTMLGlob("template/*")
+
+	// 首页
 	r.GET("/", controller.NewServiceController().Index)
 
-	//路由组
-	serviceGroup := r.Group("/service")
+	// API路由组
+	api := r.Group("/api/v1")
 	{
-		serviceGroup.POST("/add", controller.NewServiceController().Add)
-		serviceGroup.GET("/findById/:id", controller.NewServiceController().FindById)
-		serviceGroup.GET("/findByName/:key", controller.NewServiceController().FindByName)
-		serviceGroup.POST("/delete/:id", controller.NewServiceController().DeleteById)
-		serviceGroup.GET("/all", controller.NewServiceController().FindAll)
-		serviceGroup.POST("/update", controller.NewServiceController().Update)
+
+		// 服务管理
+		services := api.Group("/service")
+		{
+			serviceController := controller.NewServiceController()
+			services.POST("/add", serviceController.Add)
+			services.GET("/findById/:id", serviceController.FindById)
+			services.GET("/findByName/:key", serviceController.FindByName)
+			services.POST("/delete/:id", serviceController.DeleteById)
+			services.GET("/all", serviceController.FindAll)
+			services.POST("/update", serviceController.Update)
+		}
+
+		// 服务操作
+		cmd := api.Group("/cmd")
+		{
+			cmdController := controller.NewCmdController()
+			cmd.POST("/start/:id", cmdController.Start)
+			cmd.POST("/stop/:id", cmdController.Stop)
+			cmd.POST("/restart/:id", cmdController.Restart)
+			cmd.POST("/force-restart/:id", cmdController.ForcedRestart)
+			cmd.POST("/kill/:id", cmdController.Kill)
+		}
+
+		// 批量操作
+		batch := api.Group("/batch")
+		{
+			batchController := controller.NewBatchController()
+			batch.POST("/operation", batchController.BatchOperation)
+			batch.POST("/start-all", batchController.StartAll)
+			batch.POST("/stop-all", batchController.StopAll)
+		}
+
 	}
 
-	cmdGroup := r.Group("/cmd")
-	{
-		cmdGroup.POST("/start/:id", controller.NewCmdController().Start)
-		cmdGroup.POST("/stop/:id", controller.NewCmdController().Stop)
-		cmdGroup.POST("/restart/:id", controller.NewCmdController().Restart)
-		cmdGroup.POST("/forcedRestart/:id", controller.NewCmdController().ForcedRestart)
-		cmdGroup.POST("/kill/:id", controller.NewCmdController().Kill)
-	}
+	// 启动服务器
+	addr := "127.0.0.1:" + global.Config.Server.Port
+	log.Printf("服务管理工具启动成功，访问地址: http://%s", addr)
 
-	r.Run("127.0.0.1:" + global.Config.Port)
+	r.Run(addr)
 }
