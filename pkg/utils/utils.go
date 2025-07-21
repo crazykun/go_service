@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"go_service/app/global"
+	"go_service/app/config"
 	"net"
 	"os"
 	"os/exec"
@@ -138,7 +138,7 @@ func getPortListFromSystem() (map[string]map[string]interface{}, error) {
 		var pid, processName string
 		process := strings.SplitN(parts[6], "/", 2)
 		if len(process) == 2 {
-			if IntToString(cpid) == process[0] && port != global.Config.Server.Port {
+			if IntToString(cpid) == process[0] && port != config.GlobalConfig.Server.Port {
 				pid = "0"
 				processName = "starting..."
 			} else {

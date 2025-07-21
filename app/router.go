@@ -1,6 +1,7 @@
 package app
 
 import (
+	"go_service/app/config"
 	"go_service/app/controller"
 	"go_service/app/global"
 	"go_service/app/middleware"
@@ -14,7 +15,7 @@ func RunHttp() {
 	global.InitDatabase()
 
 	// 设置Gin模式
-	if global.Config.App.Mode == "release" {
+	if config.GlobalConfig.App.Mode == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
@@ -75,7 +76,7 @@ func RunHttp() {
 	}
 
 	// 启动服务器
-	addr := "127.0.0.1:" + global.Config.Server.Port
+	addr := "127.0.0.1:" + config.GlobalConfig.Server.Port
 	log.Printf("服务管理工具启动成功，访问地址: http://%s", addr)
 
 	r.Run(addr)

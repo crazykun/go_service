@@ -2,6 +2,7 @@ package global
 
 import (
 	"fmt"
+	"go_service/app/config"
 	"time"
 
 	"gorm.io/gorm"
@@ -11,7 +12,7 @@ var DatabaseClient map[string]*gorm.DB
 
 func InitDatabase() error {
 	// 初始化数据库
-	databaseConfig := Config.Database
+	databaseConfig := config.GlobalConfig.Database
 	if len(databaseConfig) <= 0 {
 		return nil
 	}
