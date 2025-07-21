@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"go_service/app/common"
 	"go_service/pkg/utils"
 	"os"
 	"os/exec"
@@ -11,8 +12,6 @@ import (
 	"sync"
 	"syscall"
 	"time"
-	"go_service/app/common"
-
 
 	"gorm.io/gorm"
 )
@@ -45,7 +44,7 @@ func (c *CommandService) StartService(ctx context.Context, serviceId int64) (str
 	defer c.mutex.Unlock()
 
 	startTime := time.Now()
-	
+
 	// 获取服务信息
 	service, err := c.serviceService.GetServiceById(ctx, serviceId)
 	if err != nil {
@@ -75,7 +74,7 @@ func (c *CommandService) StartService(ctx context.Context, serviceId int64) (str
 	}
 
 	// 等待服务启动完成
-	if err := c.waitForServiceStart(port, 10*time.Second); err != nil {
+	if err := c.waitForServiceStart(port, 3*time.Second); err != nil {
 		c.logService.LogOperation(ctx, serviceId, "start", "failed", output, err.Error(), time.Since(startTime))
 		return output, common.WrapError(common.ErrCodeCommandFailed, "服务启动超时", err)
 	}
@@ -91,7 +90,7 @@ func (c *CommandService) StopService(ctx context.Context, serviceId int64) (stri
 	defer c.mutex.Unlock()
 
 	startTime := time.Now()
-	
+
 	// 获取服务信息
 	service, err := c.serviceService.GetServiceById(ctx, serviceId)
 	if err != nil {
@@ -108,7 +107,7 @@ func (c *CommandService) StopService(ctx context.Context, serviceId int64) (stri
 
 	var output string
 	var finalErr error
-	
+
 	// 优先使用停止命令
 	if service.CmdStop != "" {
 		output, err = c.executeCommand(ctx, service.CmdStop, service.Dir)
@@ -133,7 +132,7 @@ func (c *CommandService) StopService(ctx context.Context, serviceId int64) (stri
 	}
 
 	// 等待服务停止完成
-	if err := c.waitForServiceStop(port, 10*time.Second); err != nil {
+	if err := c.waitForServiceStop(port, 3*time.Second); err != nil {
 		finalErr = common.WrapError(common.ErrCodeCommandFailed, "服务停止超时", err)
 		c.logService.LogOperation(ctx, serviceId, "stop", "failed", output, finalErr.Error(), time.Since(startTime))
 		return output, finalErr
@@ -231,7 +230,7 @@ func (c *CommandService) ForceRestartService(ctx context.Context, serviceId int6
 	}
 
 	// 等待服务启动完成
-	if err := c.waitForServiceStart(port, 10*time.Second); err != nil {
+	if err := c.waitForServiceStart(port, 3*time.Second); err != nil {
 		return startOutput, common.WrapError(common.ErrCodeCommandFailed, "服务启动超时", err)
 	}
 
@@ -269,13 +268,13 @@ func (c *CommandService) KillService(ctx context.Context, serviceId int64) (stri
 // BatchOperation 批量操作服务 - 优化版本
 func (c *CommandService) BatchOperation(ctx context.Context, serviceIds []int64, operation string) []map[string]interface{} {
 	results := make([]map[string]interface{}, len(serviceIds))
-	
+
 	// 限制并发数量，避免系统过载
 	maxConcurrency := 5
 	if len(serviceIds) < maxConcurrency {
 		maxConcurrency = len(serviceIds)
 	}
-	
+
 	semaphore := make(chan struct{}, maxConcurrency)
 	var wg sync.WaitGroup
 	var mu sync.Mutex
@@ -284,11 +283,11 @@ func (c *CommandService) BatchOperation(ctx context.Context, serviceIds []int64,
 		wg.Add(1)
 		go func(index int, id int64) {
 			defer wg.Done()
-			
+
 			// 获取信号量
 			semaphore <- struct{}{}
 			defer func() { <-semaphore }()
-			
+
 			result := map[string]interface{}{
 				"service_id": id,
 				"success":    false,
@@ -367,9 +366,9 @@ func (c *CommandService) executeCommand(ctx context.Context, command, workDir st
 	// 创建带超时的上下文
 	cmdCtx, cancel := context.WithTimeout(ctx, c.commandTimeout)
 	defer cancel()
-	
+
 	var cmd *exec.Cmd
-	
+
 	// 根据命令类型选择执行方式
 	if strings.Contains(command, "&&") || strings.Contains(command, "||") || strings.Contains(command, ";") {
 		// 复杂命令，使用bash执行
@@ -382,19 +381,19 @@ func (c *CommandService) executeCommand(ctx context.Context, command, workDir st
 		}
 		cmd = exec.CommandContext(cmdCtx, args[0], args[1:]...)
 	}
-	
+
 	// 设置工作目录
 	if workDir != "" {
 		cmd.Dir = workDir
 	}
-	
+
 	// 设置子进程独立于父进程
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		Setpgid: true, // 创建新进程组
 	}
 
 	// 设置环境变量限制
-	cmd.Env = append(os.Environ(), 
+	cmd.Env = append(os.Environ(),
 		"PATH=/usr/local/bin:/usr/bin:/bin", // 限制PATH
 		"SHELL=/bin/bash",                   // 固定shell
 	)
@@ -408,7 +407,7 @@ func (c *CommandService) executeCommand(ctx context.Context, command, workDir st
 		}
 		return string(output), fmt.Errorf("命令执行失败: %v", err)
 	}
-	
+
 	return string(output), nil
 }
 
