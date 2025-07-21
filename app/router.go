@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"go_service/app/config"
 	"go_service/app/controller"
 	"go_service/app/global"
@@ -29,6 +30,19 @@ func RunHttp() {
 	r.Use(middleware.HttpInterceptor())
 	r.Use(middleware.Cors())
 	r.Use(middleware.ServerContextHandler())
+	r.Use(middleware.Logger())
+
+	// 日志
+	r.Use(gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
+		return fmt.Sprintf("[GIN] %s | %3d | %13v | %15s | %-7s  %s\n",
+			param.TimeStamp.Format("2006-01-02 15:04:05"),
+			param.StatusCode,
+			param.Latency,
+			param.ClientIP,
+			param.Method,
+			param.Path,
+		)
+	}))
 
 	// 静态文件和模板
 	r.Static("/static", "./static")
@@ -40,7 +54,6 @@ func RunHttp() {
 	// API路由组
 	api := r.Group("/api/v1")
 	{
-
 		// 服务管理
 		services := api.Group("/service")
 		{

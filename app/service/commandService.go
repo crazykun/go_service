@@ -29,7 +29,7 @@ func NewCommandService(db *gorm.DB) *CommandService {
 		db:             db,
 		serviceService: NewServiceService(db),
 		logService:     NewLogService(db),
-		commandTimeout: 30 * time.Second, // 默认30秒超时
+		commandTimeout: 5 * time.Second, // 默认5秒超时
 	}
 }
 
