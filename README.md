@@ -12,6 +12,10 @@
 - **进程监控**: 实时进程状态和资源使用情况
 - **端口管理**: 自动端口检测和冲突解决
 
+## 📸 界面截图
+
+![控制台](https://raw.githubusercontent.com/crazykun/go_service/main/static/img/image.png)
+---
 
 ## 🚀 快速开始
 
@@ -56,9 +60,8 @@ vim config.yml
 
 5. **运行应用**
 
-```
-# 开发模式
 ```bash
+# 开发模式
 go run main.go
 ```
 
@@ -95,7 +98,7 @@ docker run -p 10000:10000 go-service
 
 #### 服务管理
 
-```
+```bash
 # 添加新服务
 curl -X POST http://localhost:10000/api/v1/services \
   -H "Content-Type: application/json" \
@@ -172,7 +175,6 @@ security:
 
 ### 环境变量
 
-```
 ```bash
 export GIN_MODE=release
 export DB_HOST=localhost
@@ -181,30 +183,13 @@ export DB_USER=root
 export DB_PASSWORD=password
 export DB_NAME=go_service
 ```
-```
 
-## 📊 性能表现
-
-#### 优化成果
-
-- **端口检测速度提升 50%** (100ms → 50ms)
-- **数据库查询速度提升 3-5倍** (通过索引优化)
-- **日志写入性能提升 50%** (异步处理)
-- **缓存命中率 80%+** (频繁访问数据)
-- **并发控制** 批量操作限制为 5 个并发进程
-
-#### 系统要求
-
-- **内存**: 最低 512MB，推荐 1GB+
-- **CPU**: 最低 1 核，推荐 2+ 核
-- **磁盘**: 最低 1GB 可用空间
-- **操作系统**: Linux (Ubuntu 18.04+)、macOS、Windows
 
 ## 🛠️ 开发指南
 
 #### 项目结构
 
-```
+```html
 go_service/
 ├── app/
 │   ├── controller/     # HTTP 处理器
@@ -225,7 +210,6 @@ go_service/
 
 ```bash
 # 安装依赖
-```bash
 go mod tidy
 ```
 
@@ -248,7 +232,7 @@ GOOS=linux GOARCH=amd64 go build -o go_service-linux main.go
 # 优化构建
 go build -ldflags="-s -w" -o go_service main.go
 ```
-```
+
 
 #### 贡献代码
 
@@ -258,19 +242,14 @@ go build -ldflags="-s -w" -o go_service main.go
 4. 推送到分支 (`git push origin feature/amazing-feature`)
 5. 创建 Pull Request
 
-### 📚 文档资源
-
-- [API 示例](API_EXAMPLES.md) - 完整的 API 使用示例
-- [优化指南](OPTIMIZATION_GUIDE.md) - 性能调优和最佳实践
-- [部署指南](docs/deployment.md) - 生产环境部署说明
-- [故障排查](docs/troubleshooting.md) - 常见问题和解决方案
 
 ### 🐛 故障排查
 
 #### 常见问题
 
 **服务无法启动**
-```
+
+```bash
 # 检查端口是否被占用
 netstat -tulpn | grep :10000
 
@@ -282,9 +261,11 @@ go run main.go --config-check
 ```
 
 **数据库连接失败**
-```
+
+```bash
 # 测试数据库连接
 mysql -h localhost -u root -p go_service
+```
 
 ## 📄 许可证
 
@@ -296,10 +277,6 @@ mysql -h localhost -u root -p go_service
 - **问题反馈**: 在 [GitHub Issues](https://github.com/crazykun/go_service/issues) 报告 Bug
 - **讨论交流**: 加入 [GitHub Discussions](https://github.com/crazykun/go_service/discussions)
 
-## 📸 界面截图
 
-![控制台](https://raw.githubusercontent.com/crazykun/go_service/main/static/img/image.png)
-
----
 
 ⭐ **如果这个项目对您有帮助，请给个 Star！**
